@@ -31,7 +31,7 @@ namespace A2S
         public static string InterpretA2SResponse(byte[] rawResponse)
         {
             
-            string currentDateTime = DateTime.UtcNow.ToString("dd,MM,yy,hh,mm");
+            string currentDateTime = DateTime.UtcNow.ToString("[dd,MM,yy,hh,mm]");
             //Output is an Object called PlayerData that contains an array of  { username , current DateTimeUTC } 
             string outputJSON = $"{{ \"PlayerData\" :[";
             int counter = 6; //Ignore header, start at byte 7
@@ -63,7 +63,7 @@ namespace A2S
             outputJSON += $"]}}";
 
             //DEBUG
-            Console.WriteLine(outputJSON);
+            //Console.WriteLine(outputJSON);
 
             return outputJSON;
             

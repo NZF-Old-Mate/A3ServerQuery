@@ -1,5 +1,6 @@
 ﻿/* Author: [NZF] Old Mate
  *
+ *  QUERY
  *  Send an A2S Query, recieve the response from an Arma 3 server, and store the response as a byte array
  *  
  *  A2S Queries are UDP packets 9 bytes in size. Byte 4 denotes the packet type:
@@ -20,7 +21,24 @@
  *      4 - Recieve a D packet containing player information
  *          0xFF 0xFF 0xFF 0xFF 0x44 ...
  *  
- *
+ *  =======================================================================================================================
+ *  
+ *  INTERPRETER
+ *  Interprets the output of QueryPlayers() (a byte array), extracts the relevant information, 
+ *  and returns a json string containing said information.
+ *  
+ *  According to Valve's documentation, A2S query responses follow the format
+ *  FF FF FF FF 44 ?? 00 ?? ??...  
+ *  FF FF FF FF 44 is the header, 0x44 (D) denotes A2S Player data
+ *  Byte 5 is the number of players currently online and effectively the number of player chunks 
+ *  present in the payload. Theoretically A2S allows for multicasting if a payload is too large to 
+ *  fit one packet but that is an edge case as far as this tool is concerned, thus handling multicast
+ *  packets is not implemented.
+ *  Byte 6 onwards is a player chunk, in the format:
+ *          [Index (int)][Player Username (Null-terminated String)] [Score (double)] [Length of Session in seconds (float)]
+ *  
+ *  InterpretA2SResponse returns a JSON-formatted string with structure:
+ *      {"PlayerData": {"a3ProfileName" : "User Profile Name" , "DateTime" : "[dd.MM,yy,mm,ss]" }, ... } *  
  *
  */
 
@@ -33,7 +51,7 @@ using System.Text;
 
 namespace A2S
 {
-    public class Query
+    public class A2STools
     {
         //1 - Send a U packet with no other information to request a challenge 
         static readonly byte[] Request = { 0xFF, 0xFF, 0xFF, 0xFF, 0x55, 0xFF, 0xFF, 0xFF, 0xFF }; //yyyyUyyyy
@@ -174,6 +192,8 @@ namespace A2S
             }
             return null; //Something went wrong
         }
+
+        //ADD LATER - Parse and interpret queries, parse and interpret JSON.
 
     }
 

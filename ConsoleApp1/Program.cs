@@ -41,12 +41,10 @@ internal class Program
 
     private static void DoQuery(string targetIP, int targetPort)
     {
-        //IP Address of the server being queried 
         string requestIP = targetIP;
-        //The Steam Query port is always the game port + 1
         int requestPort = targetPort;
-        //Wait time before giving up and closing the connection.
         int requestTimeout = 30;
+        
         //TEMP: Make a document to store the output 
         string outputPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
 

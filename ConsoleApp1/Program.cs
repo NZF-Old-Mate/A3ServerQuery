@@ -1,10 +1,6 @@
 ﻿// See https://aka.ms/new-console-template for more information
-using System;
-using System.Text;
-using System.IO;
-using System.CommandLine;
 using A2S;
-using System.CommandLine.Invocation;
+using System.CommandLine;
 
 namespace NZFTools;
 internal class Program
@@ -16,19 +12,19 @@ internal class Program
             description: "IP Address of the server to query.",
             getDefaultValue: () => "103.62.49.18"
             )
-            {
-                IsRequired = true
-            };
+        {
+            IsRequired = true
+        };
         targetIP.AddAlias("-t");
 
         var targetPort = new Option<int>(
-            name: "--port", 
+            name: "--port",
             description: "Steam Query Port of the server. Always game port + 1",
             getDefaultValue: () => 2313
-            ) 
-            { 
-                IsRequired = true 
-            };
+            )
+        {
+            IsRequired = true
+        };
         targetPort.AddAlias("-p");
 
         var rootCommand = new RootCommand("NZF Tools CLI")

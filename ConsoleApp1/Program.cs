@@ -52,7 +52,7 @@ internal class Program
 
         //DEBUG
         Console.WriteLine($"Making Request to {requestIP} port {requestPort} with timeout {requestTimeout} seconds.");
-        byte[] A2S_Response = Query.QueryPlayers(requestIP, requestPort, requestTimeout);
+        byte[] A2S_Response = A2STools.QueryPlayers(requestIP, requestPort, requestTimeout);
 
         //DEBUG
         Console.WriteLine($"DEBUG: Dumping raw response \n {BitConverter.ToString(A2S_Response)} ");

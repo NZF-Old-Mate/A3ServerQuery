@@ -48,16 +48,13 @@
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Text.Json;
+using DataStorage;
 
 namespace A2S
 {
     public class A2STools
     {
-        //1 - Send a U packet with no other information to request a challenge 
-        static readonly byte[] Request = { 0xFF, 0xFF, 0xFF, 0xFF, 0x55, 0xFF, 0xFF, 0xFF, 0xFF }; //yyyyUyyyy
-
-        public byte[]? A2S_Response;
-
         public static byte[] QueryPlayers(string address, int port, int timeout)
         {
             //Store the endpoint as an IPEndPoint object
@@ -65,7 +62,9 @@ namespace A2S
 
             //Create a new UdpClient
             using var udpClient = new UdpClient();
-
+            
+            //Create a U packet with no other information to request a challenge 
+            byte[] Request = { 0xFF, 0xFF, 0xFF, 0xFF, 0x55, 0xFF, 0xFF, 0xFF, 0xFF }; //yyyyUyyyy
             //Send a packet comprised of our predefined request, the length of the request, and the address to send it to
             udpClient.Send(Request, Request.Length, endPoint);
             //DEBUG: print request info to console
@@ -79,8 +78,8 @@ namespace A2S
             //Create a byte array to hold the final response
             byte[] A2S_Response;
 
-            //Create an empty byte array to return in case of an error
-            byte[] ErrorArray = { };
+            //Create byte array to return in case of an error
+            byte[] ErrorArray = { 0x6F, 0x68, 0x20, 0x64, 0x65, 0x61, 0x72, 0x21 }; //oh dear!
 
             //Start processing the recieved packet once it has completely arrived
             if (asyncResponse.IsCompleted)
@@ -107,8 +106,6 @@ namespace A2S
 
                     //DEBUG print response to console as raw bytes
                     Console.WriteLine($"Recieved response of length {A2S_Response.Length}");
-                    //string str = BitConverter.ToString(A2S_Response);
-                    //Console.WriteLine(str);
 
                     //Return the response in byte array form
                     return A2S_Response;
@@ -116,7 +113,7 @@ namespace A2S
                 else
                 {
                     //Bad response, log error, close out
-                    Console.WriteLine($"ERROR: Unexpected response, expected Length 9 and type A, got Length {response.Length} and type {response[4]}");
+                    Console.WriteLine($"ERROR: Unexpected response, expected Length 9 and type A, got Length {response.Length} and type {response[4]}. \n Dumping bad response: \n {response.ToString}");
                     udpClient.Close();
                     return ErrorArray;
                 }
@@ -138,43 +135,28 @@ namespace A2S
     {
         public static string InterpretA2SResponse(byte[] rawResponse)
         {
-
-            string currentDateTime = DateTime.UtcNow.ToString("[dd,MM,yy,hh,mm]");
-            //Output is an Object called PlayerData that contains an array of  { username , current DateTimeUTC } 
-            string outputJSON = $"{{ \"PlayerData\" :[";
+            //Returns a json-serialized object comprised of the current date/time and a list of usernames
             int counter = 6; //Ignore header, start at byte 7
+            Session session = new Session();
+            session.SessionDateTime = DateTime.UtcNow;
+            session.OnlineUsersA3ProfileNames = new List<string>();
             while (counter < rawResponse.Length)
             {
-
                 counter++; //advance 1
-
-                string? utf8string = ReadNullTerminatedString(rawResponse, ref counter);
-                if (utf8string == null) //Catch any issues with reading the username
+                string? A3ProfileName = ReadNullTerminatedString(rawResponse, ref counter);
+                if (A3ProfileName == null) 
                 {
-                    Console.WriteLine("ERROR: could not interpret null terminated string, exiting");
-                    //return "ERROR: could not interpret null terminated string, exiting";
+                    Console.WriteLine("Null profile Name"); 
+                } 
+                else 
+                {
+                    session.OnlineUsersA3ProfileNames.Add(A3ProfileName); 
                 }
-                //Dirty AF built-in JSON encoder
-                // { arma3ProfileName : currentDateTime }
-                // outputs as
-                //      { a3ProfileName :"bobsmith69420", DateTime :"dd,MM,yy,hh,mm" }, 
-                string outJsonLine = $"{{ \"a3ProfileName\" :\"{utf8string}\", \"DateTime\" :\"{currentDateTime}\"}},";
-                //DEBUG
-                Console.WriteLine(outJsonLine);
-                outputJSON += outJsonLine;
-
-
                 counter += 8; //Advance 8 bytes, we don't care about the rest of the chunk.
             }
-            //Trim off the trailing comma, close the array, close the object.
-            outputJSON = outputJSON.TrimEnd(',');
-            outputJSON += $"]}}";
-
-            //DEBUG
-            //Console.WriteLine(outputJSON);
-
-            return outputJSON;
-
+            //DEBUG: Pretty-print json output to make it human-readable
+            var options = new JsonSerializerOptions { WriteIndented = true };
+            return JsonSerializer.Serialize(session, options);
         }
 
         static string? ReadNullTerminatedString(byte[] rawResponse, ref int counter)

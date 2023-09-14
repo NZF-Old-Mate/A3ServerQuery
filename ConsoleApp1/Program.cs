@@ -46,22 +46,21 @@ internal class Program
         int requestTimeout = 30;
         
         //TEMP: Make a document to store the output 
-        string outputPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+        string outputPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\ServerSessionLogs";
 
         //DEBUG
         Console.WriteLine($"Making Request to {requestIP} port {requestPort} with timeout {requestTimeout} seconds.");
         byte[] A2S_Response = A2STools.QueryPlayers(requestIP, requestPort, requestTimeout);
 
         //DEBUG
-        Console.WriteLine($"DEBUG: Dumping raw response \n {BitConverter.ToString(A2S_Response)} ");
+        Console.WriteLine($"DEBUG: Dumping raw response \n{BitConverter.ToString(A2S_Response)} ");
         Console.WriteLine($"Interpreting Response...");
 
         //Send the byteArray over to be interpreted and encoded to JSON
         string JSONout = Interpreter.InterpretA2SResponse(A2S_Response);
 
-        using StreamWriter outputFile = new(Path.Combine(outputPath, "outputTest.json"), true);
+        using StreamWriter outputFile = new(Path.Combine(outputPath, "session_" + DateTime.UtcNow.ToString("yyyy-MM-dd") + ".json"), true);
         outputFile.WriteLine(JSONout);
-
     }
 
 

@@ -26,11 +26,20 @@ Known:
 ## 10/9/23 Refactor and cleanup
 - Removed a bunch of unnecessary code
 - Condensed Query and A2SInterpreter into a single file for portability, since Interpreter's function is always used with QueryPlayers()
-- Query class is now called A2STools class in preparation for adding more query types. Interpeter remains the same. 
+- Query class is now called A2STools class in preparation for adding more query types. Interpreter remains the same. 
+
+## 14/09/23 Further improvements
+Current plan is to have this running as a serverless Azure service accessible via a barebones REST API. Whether or not it gets containerized for ease of use elsewhere is dependent on me learning to do that.
+Changes have been made to make this easier to implement and, eventually, deploy:
+- Changed Interpreter to output some proper JSON via System.Text.JSON rather than my crappy homemade serializer.
+- Interpreter now returns a JSON serialized Session object, comprised of the current UTC DateTime and a List of online A3 Profile Names. Class definition is found in DataStorage.
+- DoQuery now writes a new .json file every time it runs instead of appending to the old one. 
+- Added a placeholder class called User to DataStorage containing a bunch of members for use later on.
+
 
 ## TODO
 - Actual data handling/storage
   - Ideally, will read existing .json, modify/append where required, then update the file.
   - Aiming for a DB-less storage solution.
-- ~~Ability to accept IP, port, and output location as arguments via console.~~
-- Implement ability to take commands from, and send output suitable for, a Discord bot.
+- ~~Ability to accept IP, port, and output location as arguments via console.~~ Done 8/9/23
+- ~~Implement ability to take commands from, and send output suitable for, a Discord bot.~~ This will happen when we move to Azure.

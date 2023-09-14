@@ -6,8 +6,8 @@ Known:
 - ~~Sometimes receives only 1 packet of 8B, sometimes will get more. Investigating.~~ fixed, see above
 - ~~OB1 problems in A2SInterpreter~~ fixed
 - ~~Documentation for A2S+Arma3 (and just A2S in general) is hot garbage.~~ Not fixed, but nothing I can do about that.
-- JSON output is weirdly formatted - this is a placeholder until data handling is implemented
-- No handling for empty responses
+- ~~JSON output is weirdly formatted - this is a placeholder until data handling is implemented~~ Output is now sensible
+- ~~No handling for empty responses~~ Partial empty response handling implemented, currently returns a Session object with a date and an empty list of names.
 
 ## New and Improved
 
